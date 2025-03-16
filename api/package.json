@@ -1,0 +1,22 @@
+{
+	"name": "api",
+	"version": "1.0.0",
+	"main": "dist/server.js",
+	"scripts": {
+		"dev": "ts-node src/index.ts",
+		"build": "tsc"
+	},
+	"repository": {
+		"type": "git",
+		"url": "github.com/markovidakovic/krk"
+	},
+	"author": "",
+	"license": "ISC",
+	"description": "",
+	"devDependencies": {
+		"@types/node": "^22.13.10",
+		"prettier": "^3.5.3",
+		"ts-node": "^10.9.2",
+		"typescript": "^5.8.2"
+	}
+}
