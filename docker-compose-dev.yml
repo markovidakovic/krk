@@ -1,0 +1,15 @@
+services:
+  api:
+    image: krk-api
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+      target: dev
+    init: true
+    volumes:
+      - type: bind
+        source: ./api
+        target: /usr/src/app
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
