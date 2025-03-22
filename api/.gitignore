@@ -1,0 +1,5 @@
+node_modules
+dist
+.npm
+temp.txt
+.env
