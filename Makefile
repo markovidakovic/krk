@@ -10,9 +10,10 @@ TEST_COMPOSE_FILE := docker-compose-test.yml
 API_IMAGE_NAME := krk-api
 API_DEV_TAG := dev
 
-.PHONY: help build-api run-api stop-api  \
-		compose-build compose-up compose-up-build compose-down  \
-		clean clean-all
+.PHONY: help \ 
+	build-api run-api stop-api  \
+	compose-build compose-up compose-up-build compose-down  \
+	clean clean-all
 
 help:
 	@echo "Availbale commands:"
