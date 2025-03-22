@@ -1,10 +1,9 @@
 services:
   api:
-    image: krk-api
     build:
       context: ./api
       dockerfile: Dockerfile
-      target: dev
+      target: development
     init: true
     volumes:
       - type: bind
