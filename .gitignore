@@ -2,3 +2,4 @@
 /api/dist
 /api/.npm
 /api/temp.txt
+/api/.env
