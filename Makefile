@@ -9,9 +9,12 @@ TEST_COMPOSE_FILE := docker-compose-test.yml
 # vars
 API_IMAGE_NAME := krk-api
 API_DEV_TAG := dev
+PROC_IMAGE_NAME := krk-proc
+PROC_DEV_TAG := dev
 
 .PHONY: help \ 
 	build-api run-api stop-api  \
+	build-proc run-proc stop-proc \
 	compose-build compose-up compose-up-build compose-down  \
 	clean clean-all
 
@@ -22,6 +25,11 @@ help:
 	@echo "make build-api - Build the API development image"
 	@echo "make run-api - Run the API container in development mode"
 	@echo "make stop-api - Stop the running API container"
+	@echo ""
+	@echo "Processing container commands:"
+	@echo "make build-proc - Build the Processing development image"
+	@echo "make run-proc - Run the Processing container in development mode"
+	@echo "make stop-proc - Stop the running Processing container"
 	@echo ""
 	@echo "Development commands:"
 	@echo "make compose-build - Build all services with docker compose"
@@ -44,7 +52,7 @@ build-api:
 	@echo "Building $(API_IMAGE_NAME) development image..."
 	docker build --target development -t $(API_IMAGE_NAME):$(API_DEV_TAG) ./api
 
-# run the api container in development mode
+# run the api container 
 run-api:
 	@echo "Running $(API_IMAGE_NAME) development container..."
 	docker run -p 3000:3000 -v $$(pwd)/api:/usr/src/app --name $(API_IMAGE_NAME)-dev $(API_IMAGE_NAME):$(API_DEV_TAG)
@@ -52,8 +60,24 @@ run-api:
 # stop the api container
 stop-api:
 	@echo "Stopping $(API_IMAGE_NAME) development container..."
-	docker stop $(API_IMAGE_NAME)-dev || true
-	docker rm $(API_IMAGE_NAME)-dev || true
+	docker stop $(API_IMAGE_NAME)-dev
+	docker container rm $(API_IMAGE_NAME)-dev
+
+# build the proc development image
+build-proc:
+	@echo "Building $(PROC_IMAGE_NAME) development image..."
+	docker build --target development -t $(PROC_IMAGE_NAME):$(PROC_DEV_TAG) ./proc
+
+# run the proc container 
+run-proc:
+	@echo "Running $(PROC_IMAGE_NAME) development container..."
+	docker run -v $$(pwd)/proc:/usr/src/app --name $(PROC_IMAGE_NAME)-dev $(PROC_IMAGE_NAME):$(PROC_DEV_TAG)
+
+# stop the proc container
+stop-proc:
+	@echo "Stopping $(PROC_IMAGE_NAME) development container..."
+	docker stop $(PROC_IMAGE_NAME)-dev
+	docker container rm $(PROC_IMAGE_NAME)-dev
 
 # build all services with docker compose
 compose-build:

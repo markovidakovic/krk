@@ -1,6 +1,4 @@
-ARG BASE_IMAGE_TAG=22.14-alpine
-
-FROM node:${BASE_IMAGE_TAG} AS base
+FROM node:22.14-alpine AS base
 
 # specify work dir
 WORKDIR /usr/src/app

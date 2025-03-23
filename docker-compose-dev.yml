@@ -9,6 +9,24 @@ services:
       - type: bind
         source: ./api
         target: /usr/src/app
+    networks:
+      - krk
     ports:
       - "3000:3000"
     restart: unless-stopped
+  proc:
+    build:
+      context: ./proc
+      dockerfile: Dockerfile
+      target: development
+    init: true
+    volumes:
+      - type: bind
+        source: ./proc
+        target: /usr/src/app
+    networks:
+      - krk
+    restart: unless-stopped
+
+networks:
+  krk:
