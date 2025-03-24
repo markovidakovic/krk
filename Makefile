@@ -115,7 +115,7 @@ clean:
 	docker compose -f $(DEV_COMPOSE_FILE) down --volumes --remove-orphans
 	@echo "Cleanup completed!"
 
-# Clean all containers and images
+# clean all containers and images
 clean-all:
 	@echo "Removing all Docker containers and images related to the project..."
 	docker compose -f $(DEV_COMPOSE_FILE) down --rmi all --volumes --remove-orphans || true

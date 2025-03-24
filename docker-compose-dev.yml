@@ -1,32 +1,53 @@
 services:
   api:
+    image: krk-api:${API_TAG}
     build:
       context: ./api
       dockerfile: Dockerfile
       target: development
     init: true
     volumes:
-      - type: bind
-        source: ./api
-        target: /usr/src/app
+      - ./api:/usr/src/app
+      - ./files:/usr/src/app/data
     networks:
-      - krk
+      - krk-network
     ports:
       - "3000:3000"
-    restart: unless-stopped
+    depends_on:
+      database:
+        condition: service_healthy
   proc:
+    image: krk-proc:${PROC_TAG}
     build:
       context: ./proc
       dockerfile: Dockerfile
       target: development
     init: true
     volumes:
-      - type: bind
-        source: ./proc
-        target: /usr/src/app
+      - ./proc:/usr/src/app
+      - ./files:/usr/src/app/data
     networks:
-      - krk
-    restart: unless-stopped
+      - krk-network
+  database:
+    image: postgres:${PG_VERSION}
+    environment:
+      - POSTGRES_DB=${PG_DATABASE}
+      - POSTGRES_USER=${PG_USERNAME}
+      - POSTGRES_PASSWORD=${PG_PASSWORD}
+    volumes:
+      - data:/var/lib/postgresql/data
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - krk-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $PG_USERNAME -d $PG_DATABASE"]
+      interval: 3s
+      timeout: 5s
+      retries: 5
 
 networks:
-  krk:
+  krk-network:
+    driver: bridge
+
+volumes:
+  data:
