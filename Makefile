@@ -120,5 +120,7 @@ clean-all:
 	@echo "Removing all Docker containers and images related to the project..."
 	docker compose -f $(DEV_COMPOSE_FILE) down --rmi all --volumes --remove-orphans || true
 	docker rm -f $$(docker ps -a -q --filter "name=$(API_IMAGE_NAME)*") 2>/dev/null || true
+	docker rm -f $$(docker ps -a -q --filter "name=$(PROC_IMAGE_NAME)*") 2>/dev/null || true
 	docker rmi -f $$(docker images "$(API_IMAGE_NAME)*" -q) 2>/dev/null || true
+	docker rmi -f $$(docker images "$(PROC_IMAGE_NAME)*" -q) 2>/dev/null || true
 	@echo "Full cleanup completed!"
