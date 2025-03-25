@@ -1,3 +1,5 @@
+import http from 'node:http';
+
 type ProcStatus = 'Processing' | 'Failed' | 'Successful';
 
 export interface FileRecord {
@@ -7,4 +9,13 @@ export interface FileRecord {
   processed_path: string | null;
   processing_error: string | null;
   created_at: Date;
+}
+
+export interface RequestContext {
+  req: http.IncomingMessage;
+  res: http.ServerResponse;
+  method: string;
+  path: string;
+  body: Record<string, any>;
+  fileId?: string;
 }
