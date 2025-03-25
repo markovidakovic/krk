@@ -1,13 +1,11 @@
-import http from 'node:http';
 import 'dotenv/config';
+import http from 'node:http';
+import * as db from './db';
+
+db.ping();
 
 http
   .createServer((req, res) => {
-    const { headers, method, url } = req;
-    console.log(headers);
-    console.log(method);
-    console.log(url);
-
     res.writeHead(200, {
       'Content-Type': 'application/json',
     });
