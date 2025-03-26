@@ -3,6 +3,7 @@ import http from 'node:http';
 import * as db from './db';
 import { RequestContext } from './types';
 import { parseRequestBody } from './req';
+import { handleBase, handleGetFiles, handleGetFile, handleDeleteFile, handleProcessFile } from './handlers';
 
 db.ping();
 
@@ -19,7 +20,6 @@ http
 
     let body: Record<string, any> = {};
     if (method === 'POST' || method === 'PUT') {
-      // just for testing body extraction
       body = await parseRequestBody(req);
     }
 
@@ -27,27 +27,18 @@ http
       req,
       res,
       method,
-      path: url,
+      url,
       body,
     };
 
-    console.log(reqCtx);
-
     if (method === 'GET' && url === '/') {
-      res.writeHead(200, {
-        'Content-Type': 'application/json',
-      });
-      res.end(
-        JSON.stringify({
-          title: process.env.API_TITLE,
-        }),
-      );
+      await handleBase(reqCtx);
       return;
     }
 
     if (method === 'GET' && url === '/files') {
-      // handle get all files
-      console.log('get all files');
+      await handleGetFiles(reqCtx);
+      return;
     }
 
     const regex = /^\/files\/(\d+)$/;
@@ -59,23 +50,24 @@ http
       reqCtx.fileId = match[1];
       switch (method) {
         case 'GET':
-          console.log('get file by id');
+          await handleGetFile(reqCtx);
           break;
 
         case 'DELETE':
-          console.log('delete file');
-
+          await handleDeleteFile(reqCtx);
+          break;
         default:
           break;
       }
+      return;
     }
 
     if (method === 'POST' && url === '/files/process') {
-      // extract the body
-      // handle start process
-      console.log('start processing file');
+      await handleProcessFile(reqCtx);
+      return;
     }
 
+    console.log('url or method not supported');
     res.end('hello');
   })
   .listen(process.env.API_PORT);

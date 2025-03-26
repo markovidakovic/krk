@@ -1,4 +1,5 @@
 import pg from 'pg';
+import { Query } from './types';
 const { Pool } = pg;
 
 const pool = new Pool({
@@ -17,7 +18,10 @@ const pool = new Pool({
 //   return res;
 // };
 
-export const query = async (text: string, params?: any) => await pool.query(text, params);
+export const query = async <T extends pg.QueryResultRow = pg.QueryResultRow>(params: Query): Promise<pg.QueryResult<T>> => {
+  return await pool.query(params);
+};
+
 export const getClient = async () => await pool.connect();
 
 export const ping = async (): Promise<void> => {

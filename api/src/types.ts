@@ -15,7 +15,12 @@ export interface RequestContext {
   req: http.IncomingMessage;
   res: http.ServerResponse;
   method: string;
-  path: string;
+  url: string;
   body: Record<string, any>;
   fileId?: string;
+}
+
+export interface Query {
+  text: string;
+  values?: string[];
 }
