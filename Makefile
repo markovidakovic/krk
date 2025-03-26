@@ -12,12 +12,7 @@ API_DEV_TAG := dev
 PROC_IMAGE_NAME := krk-proc
 PROC_DEV_TAG := dev
 
-.PHONY: help \ 
-	build-api run-api stop-api  \
-	build-proc run-proc stop-proc \
-	compose-build compose-up compose-up-build compose-down  \
-	clean clean-all
-
+.PHONY: help
 help:
 	@echo "Availbale commands:"
 	@echo ""
@@ -48,74 +43,88 @@ help:
 	@echo "make clean-all - Remove all docker containers and images related to the project"
 
 # build the api development image
+.PHONY: build-api
 build-api:
 	@echo "Building $(API_IMAGE_NAME) development image..."
 	docker build --target development -t $(API_IMAGE_NAME):$(API_DEV_TAG) ./api
 
 # run the api container 
+.PHONY: run-api
 run-api:
 	@echo "Running $(API_IMAGE_NAME) development container..."
 	docker run -p 3000:3000 -v $$(pwd)/api:/usr/src/app --name $(API_IMAGE_NAME)-dev $(API_IMAGE_NAME):$(API_DEV_TAG)
 
 # stop the api container
+.PHONY: stop-api
 stop-api:
 	@echo "Stopping $(API_IMAGE_NAME) development container..."
 	docker stop $(API_IMAGE_NAME)-dev
 	docker container rm $(API_IMAGE_NAME)-dev
 
 # build the proc development image
+.PHONY: build-proc
 build-proc:
 	@echo "Building $(PROC_IMAGE_NAME) development image..."
 	docker build --target development -t $(PROC_IMAGE_NAME):$(PROC_DEV_TAG) ./proc
 
 # run the proc container 
+.PHONY: run-proc
 run-proc:
 	@echo "Running $(PROC_IMAGE_NAME) development container..."
 	docker run -v $$(pwd)/proc:/usr/src/app --name $(PROC_IMAGE_NAME)-dev $(PROC_IMAGE_NAME):$(PROC_DEV_TAG)
 
 # stop the proc container
+.PHONY: stop-proc
 stop-proc:
 	@echo "Stopping $(PROC_IMAGE_NAME) development container..."
 	docker stop $(PROC_IMAGE_NAME)-dev
 	docker container rm $(PROC_IMAGE_NAME)-dev
 
 # build all services with docker compose
+.PHONY: compose-build
 compose-build:
 	@echo "Building all services with docker compose..."
 	docker compose -f $(DEV_COMPOSE_FILE) build
 
 # start all services with docker compose
+.PHONY: compose-up
 compose-up:
 	@echo "Starting all services with docker compose..."
 	docker compose -f $(DEV_COMPOSE_FILE) up
 
 # start and build all services with docker compose
+.PHONY: compose-up-build
 compose-up-build:
 	@echo "Starting and building all services with docker compose..."
 	docker compose -f $(DEV_COMPOSE_FILE) up --build
 
 # start all services with docker compose in deatached mode
+.PHONY: compose-up-d
 compose-up-d:
 	@echo "Starting all services with docker compose in deatached mode..."
 	docker compose -f $(DEV_COMPOSE_FILE) up -d
 
 # stop all services started with docker compose
+.PHONY: compose-down
 compose-down:
 	@echo "Stopping all services started with docker compose..."
 	docker compose -f $(DEV_COMPOSE_FILE) down
 
 # view logs for all services
+.PHONY: compose-logs
 compose-logs:
 	@echo "Viewing logs for all services..."
 	docker compose -f $(DEV_COMPOSE_FILE) logs -f
 
 # clean containers and images
+.PHONY: clean
 clean:
 	@echo "Removing containers"
 	docker compose -f $(DEV_COMPOSE_FILE) down --volumes --remove-orphans
 	@echo "Cleanup completed!"
 
 # clean all containers and images
+.PHONY: clean-all
 clean-all:
 	@echo "Removing all Docker containers and images related to the project..."
 	docker compose -f $(DEV_COMPOSE_FILE) down --rmi all --volumes --remove-orphans || true
