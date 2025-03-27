@@ -26,20 +26,24 @@ export async function handleGetFiles(ctx: RequestContext) {
 }
 
 export async function handleGetFile(ctx: RequestContext) {
-  const { res } = ctx;
+  const { res, fileId } = ctx;
 
-  console.log(ctx.method);
-  console.log(ctx.fileId);
+  if (fileId) {
+    const sql: Query = {
+      text: 'select * from files where id = $1',
+      values: [fileId],
+    };
 
-  res.writeHead(200, { 'content-type': 'application/json' });
-  res.end('handle get file');
+    const result = await db.query<FileRecord>(sql);
+
+    res.writeHead(200, { 'content-type': 'application/json' });
+    res.end(JSON.stringify(result));
+  }
 }
 
 export async function handleProcessFile(ctx: RequestContext) {
-  const { res } = ctx;
-
-  console.log(ctx.method);
-  console.log(ctx.body);
+  const { res, body } = ctx;
+  console.log(body);
 
   res.writeHead(200, { 'content-type': 'application/json' });
   res.end('handle process file');

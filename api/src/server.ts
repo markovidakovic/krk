@@ -42,7 +42,7 @@ http
     }
 
     const regex = /^\/files\/(\d+)$/;
-    // const regex = /^\/files\/([0-9a-fA-F-]{36})$/
+    // const regex = /^\/files\/([0-9a-fA-F-]{36})$/;
 
     const match = url.match(regex);
 

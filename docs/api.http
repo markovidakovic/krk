@@ -1,0 +1,22 @@
+GET http://localhost:3000 HTTP/1.1
+
+###
+
+GET http://localhost:3000/files HTTP/1.1
+
+###
+
+GET http://localhost:3000/files/1 HTTP/1.1
+
+###
+
+POST http://localhost:3000/files/process HTTP/1.1
+content-type: application/json
+
+{
+    "file_path": "/files/mp4/video.mp4"
+}
+
+###
+
+DELETE http://localhost:3000/files/1 HTTP/1.1
