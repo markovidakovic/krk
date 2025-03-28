@@ -32,37 +32,37 @@ export async function handleGetFiles(ctx: RequestContext) {
 export async function handleGetFile(ctx: RequestContext) {
   const { res, fileId } = ctx;
 
-  if (fileId) {
-    try {
-      const sql: Query = {
-        text: 'select * from files where id = $1',
-        values: [fileId],
-      };
-
-      const result = await db.query<FileRecord>(sql);
-
-      if (result.rows.length === 0) {
-        res.writeHead(404, { 'content-type': 'application/json' });
-        res.end(JSON.stringify({ message: 'file not found' }));
-        return;
-      }
-
-      res.writeHead(200, { 'content-type': 'application/json' });
-      res.end(JSON.stringify(result.rows[0]));
-    } catch (error) {
-      res.writeHead(500, { 'content-type': 'application/json' });
-      res.end(JSON.stringify({ message: 'internal server error' }));
-    }
-  } else {
+  if (!fileId) {
     res.writeHead(400, { 'content-type': 'application/json' });
-    res.end(JSON.stringify({ message: 'file id is not valid' }));
+    res.end(JSON.stringify({ message: 'invalid file id' }));
+    return;
+  }
+
+  try {
+    const sql: Query = {
+      text: 'select * from files where id = $1',
+      values: [fileId],
+    };
+
+    const result = await db.query<FileRecord>(sql);
+
+    if (result.rowCount === 0) {
+      res.writeHead(404, { 'content-type': 'application/json' });
+      res.end(JSON.stringify({ message: 'file not found' }));
+      return;
+    }
+
+    res.writeHead(200, { 'content-type': 'application/json' });
+    res.end(JSON.stringify(result.rows[0]));
+  } catch (error) {
+    res.writeHead(500, { 'content-type': 'application/json' });
+    res.end(JSON.stringify({ message: 'internal server error' }));
   }
 }
 
 export async function handleProcessFile(ctx: RequestContext) {
   const { res, body } = ctx;
 
-  // check if body is ok
   if (!body.file_path) {
     res.writeHead(400, { 'content-type': 'application/json' });
     res.end(JSON.stringify({ message: 'file_path is required' }));
@@ -75,7 +75,7 @@ export async function handleProcessFile(ctx: RequestContext) {
     await fsPromises.access(absFilePath, fsPromises.constants.F_OK);
   } catch (error) {
     res.writeHead(400, { 'content-type': 'application/json' });
-    res.end(JSON.stringify({ message: 'cannot find the file' }));
+    res.end(JSON.stringify({ message: 'file not found' }));
     return;
   }
 
@@ -98,11 +98,66 @@ export async function handleProcessFile(ctx: RequestContext) {
 }
 
 export async function handleDeleteFile(ctx: RequestContext) {
-  const { res } = ctx;
+  const { res, fileId } = ctx;
 
-  console.log(ctx.method);
-  console.log(ctx.fileId);
+  if (!fileId) {
+    res.writeHead(400, { 'content-type': 'application/json' });
+    res.end(JSON.stringify({ message: 'invalid file id' }));
+    return;
+  }
 
-  res.writeHead(200, { 'content-type': 'application/json' });
-  res.end('handle delete file');
+  try {
+    const findSql: Query = {
+      text: 'select * from files where id = $1',
+      values: [fileId],
+    };
+    const result = await db.query<FileRecord>(findSql);
+    if (result.rowCount === 0) {
+      res.writeHead(404, { 'content-type': 'application/json' });
+      res.end(JSON.stringify({ message: 'file not found' }));
+      return;
+    }
+
+    const filePath = result.rows[0].path;
+    const fileProcessedPath = result.rows[0].processed_path;
+
+    const deletionPromises: Promise<void>[] = [];
+
+    // check if original file exists and add to deletion promises
+    try {
+      await fsPromises.access(filePath);
+      deletionPromises.push(fsPromises.unlink(filePath));
+    } catch (error) {
+      console.warn(`original file not found or not accessible: ${filePath}`);
+    }
+
+    // only handle processed file if it is not null
+    if (fileProcessedPath !== null) {
+      try {
+        await fsPromises.access(fileProcessedPath);
+        deletionPromises.push(fsPromises.unlink(fileProcessedPath));
+      } catch (error) {
+        console.warn(`processed file not found or not accessible: ${fileProcessedPath}`);
+      }
+    }
+
+    // delete all accessible files
+    if (deletionPromises.length > 0) {
+      await Promise.all(deletionPromises);
+    }
+
+    // only delete the database record if we've gotten this far
+    const deleteSql: Query = {
+      text: 'delete from files where id = $1',
+      values: [fileId],
+    };
+
+    await db.query(deleteSql);
+
+    res.statusCode = 204;
+    res.end();
+  } catch (error) {
+    res.writeHead(500, { 'content-type': 'application/json' });
+    res.end(JSON.stringify({ message: 'internal server error' }));
+  }
 }
