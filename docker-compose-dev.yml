@@ -8,7 +8,7 @@ services:
     init: true
     volumes:
       - ./api:/usr/src/app
-      - ./files:/usr/src/app/data
+      - ./files:/usr/src/app/files
     networks:
       - krk-network
     ports:
@@ -25,7 +25,7 @@ services:
     init: true
     volumes:
       - ./proc:/usr/src/app
-      - ./files:/usr/src/app/data
+      - ./files:/usr/src/app/files
     networks:
       - krk-network
   database:

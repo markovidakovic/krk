@@ -9,7 +9,13 @@ export function parseRequestBody(req: http.IncomingMessage): Promise<Record<stri
       })
       .on('end', () => {
         let bodyStr = Buffer.concat(bodyBuf).toString();
-        resolve(JSON.parse(bodyStr));
+
+        try {
+          resolve(JSON.parse(bodyStr));
+        } catch (error) {
+          // console.log(error);
+          reject(new Error('invalid json'));
+        }
       });
   });
 }

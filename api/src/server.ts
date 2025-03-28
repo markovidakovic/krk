@@ -20,7 +20,21 @@ http
 
     let body: Record<string, any> = {};
     if (method === 'POST' || method === 'PUT') {
-      body = await parseRequestBody(req);
+      try {
+        body = await parseRequestBody(req);
+        console.log('parsed body:', body);
+      } catch (error) {
+        // console.log(error);
+        res.writeHead(400, {
+          'conten-type': 'application/json',
+        });
+        res.end(
+          JSON.stringify({
+            message: 'invalid request body',
+          }),
+        );
+        return;
+      }
     }
 
     const reqCtx: RequestContext = {
