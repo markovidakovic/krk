@@ -1,4 +1,3 @@
-import 'dotenv/config';
 import http from 'node:http';
 import { RequestContext } from './types';
 import { parseRequestBody } from './req';
