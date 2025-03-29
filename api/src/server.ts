@@ -3,6 +3,7 @@ import http from 'node:http';
 import * as db from './db';
 import { RequestContext } from './types';
 import { parseRequestBody } from './req';
+import { handleResourceNotFound, handleMethodNotAllowed } from './res';
 import { handleBase, handleGetFiles, handleGetFile, handleDeleteFile, handleProcessFile } from './handlers';
 
 db.ping();
@@ -45,13 +46,28 @@ http
       body,
     };
 
-    if (method === 'GET' && url === '/') {
-      await handleBase(reqCtx);
+    if (url === '/') {
+      switch (method) {
+        case 'GET':
+          await handleBase(reqCtx);
+          break;
+
+        default:
+          handleMethodNotAllowed(reqCtx);
+          break;
+      }
       return;
     }
 
-    if (method === 'GET' && url === '/files') {
-      await handleGetFiles(reqCtx);
+    if (url === '/files') {
+      switch (method) {
+        case 'GET':
+          await handleGetFiles(reqCtx);
+          break;
+        default:
+          handleMethodNotAllowed(reqCtx);
+          break;
+      }
       return;
     }
 
@@ -63,22 +79,30 @@ http
         case 'GET':
           await handleGetFile(reqCtx);
           break;
-
         case 'DELETE':
           await handleDeleteFile(reqCtx);
           break;
         default:
+          handleMethodNotAllowed(reqCtx);
           break;
       }
       return;
     }
 
-    if (method === 'POST' && url === '/files/process') {
-      await handleProcessFile(reqCtx);
+    if (url === '/files/process') {
+      switch (method) {
+        case 'POST':
+          await handleProcessFile(reqCtx);
+          break;
+
+        default:
+          handleMethodNotAllowed(reqCtx);
+          break;
+      }
       return;
     }
 
-    console.log('url or method not supported');
-    res.end('hello');
+    handleResourceNotFound(reqCtx);
+    return;
   })
   .listen(process.env.API_PORT);

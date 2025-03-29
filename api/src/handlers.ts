@@ -24,7 +24,7 @@ export async function handleGetFiles(ctx: RequestContext) {
     res.writeHead(200, { 'content-type': 'application/json' });
     res.end(JSON.stringify(result.rows));
   } catch (error) {
-    res.writeHead(200, { 'content-type': 'application/json' });
+    res.writeHead(500, { 'content-type': 'application/json' });
     res.end(JSON.stringify({ message: 'internal server error' }));
   }
 }
