@@ -55,10 +55,7 @@ http
       return;
     }
 
-    const regex = /^\/files\/(\d+)$/;
-    // const regex = /^\/files\/([0-9a-fA-F-]{36})$/;
-
-    const match = url.match(regex);
+    const match = url.match(/^\/files\/(\d+)$/);
 
     if (match) {
       reqCtx.fileId = match[1];
