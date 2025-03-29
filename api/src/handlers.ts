@@ -2,6 +2,7 @@ import path from 'node:path';
 import { promises as fsPromises } from 'node:fs';
 import * as db from './db';
 import { RequestContext, Query, FileRecord } from './types';
+import { publishMessage } from './nats';
 
 export async function handleBase(ctx: RequestContext) {
   const { res } = ctx;
@@ -86,14 +87,36 @@ export async function handleProcessFile(ctx: RequestContext) {
     };
 
     const result = await db.query<FileRecord>(sql);
+    const file = result.rows[0];
 
-    // publish message for processing
+    // publish nats msg
+    const isPublished = publishMessage(file.id, file.path);
+    if (!isPublished) {
+      // if not able to publish, upate the db record
+      try {
+        const sql: Query = {
+          text: 'update files set status set status = $1, processing_error = $2 where id = $3',
+          values: ['Failed', 'Failed to publish processing request', file.id.toString()],
+        };
+        await db.query<FileRecord>(sql);
+
+        res.writeHead(500, { 'content-type': 'application/json' });
+        res.end(JSON.stringify({ message: 'failed to send processing request' }));
+        return;
+      } catch (error) {
+        res.writeHead(500, { 'content-type': 'application/json' });
+        res.end(JSON.stringify({ message: 'internal server error' }));
+        return;
+      }
+    }
 
     res.writeHead(202, { 'content-type': 'application/json' });
-    res.end(JSON.stringify(result.rows[0]));
+    res.end(JSON.stringify(file));
+    return;
   } catch (error) {
     res.writeHead(500, { 'content-type': 'application/json' });
     res.end(JSON.stringify({ message: 'internal server error' }));
+    return;
   }
 }
 

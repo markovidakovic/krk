@@ -1,20 +1,14 @@
-import { connect, NatsConnection } from 'nats';
+import { connect, NatsConnection, StringCodec } from 'nats';
+import { ProcessRequest } from './types';
 
 let natsConn: NatsConnection | null = null;
-// const codec = StringCodec();
+const codec = StringCodec();
 
-export async function connectNats(): Promise<NatsConnection | null> {
+export async function connectNats(): Promise<void> {
   try {
-    return await connect({ servers: process.env.NATS_SERVER });
+    natsConn = await connect({ servers: process.env.NATS_SERVER });
   } catch (error) {
-    console.error('failed to connect to  nats:', error);
-    return null;
-  }
-}
-
-export function publishMessage() {
-  if (natsConn === null) {
-    console.log('nats not connected');
+    console.error('failed to connect to nats:', error);
   }
 }
 
@@ -22,4 +16,16 @@ export function subscribeNats() {
   if (natsConn === null) {
     console.log('nats not connected');
   }
+}
+
+export function publishMessage(fileId: number, filePath: string): boolean {
+  if (natsConn === null) {
+    return false;
+  }
+
+  const procReq: ProcessRequest = { fileId, filePath };
+
+  natsConn.publish('mp4.process', codec.encode(JSON.stringify(procReq)));
+  console.log(`published processing request for -> fileId: ${procReq.fileId}, filePath: ${procReq.filePath}`);
+  return true;
 }

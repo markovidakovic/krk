@@ -24,3 +24,8 @@ export interface Query {
   text: string;
   values?: string[];
 }
+
+export interface ProcessRequest {
+  fileId: number;
+  filePath: string;
+}
