@@ -50,4 +50,4 @@ COPY --from=build --chown=node:node /usr/src/app/dist ./
 # indicate expected port
 EXPOSE 3000
 
-CMD ["node", "server.js"]
+CMD ["node", "index.js"]
