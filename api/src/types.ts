@@ -25,7 +25,13 @@ export interface Query {
   values?: string[];
 }
 
-export interface ProcessRequest {
-  fileId: number;
-  filePath: string;
+export interface ProcessFileRequest {
+  id: number;
+  path: string;
+}
+
+export interface ProcessedFile {
+  id: number;
+  processedPath?: string;
+  processingError?: string;
 }
