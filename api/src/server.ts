@@ -1,12 +1,9 @@
 import 'dotenv/config';
 import http from 'node:http';
-import * as db from './db';
 import { RequestContext } from './types';
 import { parseRequestBody } from './req';
 import { handleResourceNotFound, handleMethodNotAllowed } from './res';
 import { handleBase, handleGetFiles, handleGetFile, handleDeleteFile, handleProcessFile } from './handlers';
-
-db.ping();
 
 http
   .createServer(async (req, res) => {
@@ -25,7 +22,6 @@ http
         body = await parseRequestBody(req);
         console.log('parsed body:', body);
       } catch (error) {
-        // console.log(error);
         res.writeHead(400, {
           'conten-type': 'application/json',
         });
