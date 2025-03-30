@@ -17,7 +17,7 @@ export async function connectNats(): Promise<void> {
 export function subscribeNats() {
   if (natsConn !== null) {
     // wildcard subscription
-    const sub = natsConn.subscribe('mp4.process.*');
+    const sub = natsConn.subscribe('mp4.result.*');
 
     (async () => {
       for await (const m of sub) {

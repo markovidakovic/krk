@@ -6,7 +6,7 @@ services:
       dockerfile: Dockerfile
       target: development
     volumes:
-      - ./api:/usr/src/app/src
+      - ./api:/usr/src/app
       - ./files:/usr/src/app/files
     networks:
       - krk-network
@@ -22,7 +22,7 @@ services:
       dockerfile: Dockerfile
       target: development
     volumes:
-      - ./proc:/usr/src/app/cmd
+      - ./proc:/usr/src/app
       - ./files:/usr/src/app/files
     networks:
       - krk-network
