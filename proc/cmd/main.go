@@ -14,6 +14,11 @@ import (
 	"github.com/nats-io/nats.go"
 )
 
+var (
+	maxJobs  = 5
+	semaphor = make(chan struct{}, maxJobs)
+)
+
 func main() {
 	sigCh := make(chan os.Signal, 1)
 	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM)
@@ -36,24 +41,34 @@ func main() {
 
 		fmt.Printf("received processing request for -> fileId: %d, filePath: %s\n", req.Id, req.Path)
 
-		type result struct {
-			Id              int    `json:"id"`
-			ProcessedPath   string `json:"processedPath,omitempty"`
-			ProcessingError string `json:"processingError,omitempty"`
-		}
+		go func(fileId int, filePath string) {
+			semaphor <- struct{}{} // acquire
+			fmt.Printf("starting processing for -> fileId: %d, filePath: %s (active jobs: %d/%d)\n", fileId, filePath, len(semaphor), maxJobs)
 
-		res := result{Id: req.Id}
+			defer func() {
+				<-semaphor // release
+				fmt.Printf("finished processing for -> fileId %d, filePath: %s (active jobs: %d/%d)\n", fileId, filePath, len(semaphor), maxJobs)
+			}()
 
-		procPath, err := processFile(req.Path)
-		if err != nil {
-			res.ProcessingError = err.Error()
-		} else {
-			res.ProcessedPath = procPath
-		}
+			type result struct {
+				Id              int    `json:"id"`
+				ProcessedPath   string `json:"processedPath,omitempty"`
+				ProcessingError string `json:"processingError,omitempty"`
+			}
 
-		// publish result to nats
-		resData, _ := json.Marshal(res)
-		nc.Publish("mp4.result."+fmt.Sprintf("%d", req.Id), resData)
+			res := result{Id: fileId}
+
+			procPath, err := processFile(filePath)
+			if err != nil {
+				res.ProcessingError = err.Error()
+			} else {
+				res.ProcessedPath = procPath
+			}
+
+			// publish result to nats
+			resData, _ := json.Marshal(res)
+			nc.Publish("mp4.result."+fmt.Sprintf("%d", fileId), resData)
+		}(req.Id, req.Path)
 	})
 	if err != nil {
 		log.Fatalf("failed to subscribe: %v", err)
