@@ -123,5 +123,5 @@ curl http://localhost:3000/files
 # Process a file
 curl -X http://localhost:3000/files/process \
     -H "Content-Type: application/json" \
-    -d '{"filePath": "files/mp4/video.mp4"}'
+    -d '{"file_path": "files/mp4/video.mp4"}'
 ```
