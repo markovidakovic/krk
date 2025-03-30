@@ -5,9 +5,8 @@ services:
       context: ./api
       dockerfile: Dockerfile
       target: development
-    init: true
     volumes:
-      - ./api:/usr/src/app
+      - ./api:/usr/src/app/src
       - ./files:/usr/src/app/files
     networks:
       - krk-network
@@ -22,9 +21,8 @@ services:
       context: ./proc
       dockerfile: Dockerfile
       target: development
-    init: true
     volumes:
-      - ./proc:/usr/src/app
+      - ./proc:/usr/src/app/cmd
       - ./files:/usr/src/app/files
     networks:
       - krk-network

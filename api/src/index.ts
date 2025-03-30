@@ -6,6 +6,7 @@ import { connectNats } from './nats';
 const run = async () => {
   await connectNats();
   http.createServer(create).listen(process.env.API_PORT);
+  console.log('rest api listening for requests');
 };
 
 run();
